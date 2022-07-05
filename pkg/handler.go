@@ -13,9 +13,20 @@ func Router() *chi.Mux {
 	r := chi.NewRouter()
 	r.Use(middleware.Logger)
 
+	r.Get("/", hello)
 	r.Post("/split-payments/computes", split)
 
 	return r
+}
+
+func hello(w http.ResponseWriter, r *http.Request) {
+	renderResponse(w,
+		map[string]string{
+			"status":  "ok",
+			"message": "Welcome to Lannister Pay!",
+		},
+		http.StatusOK,
+	)
 }
 
 func split(w http.ResponseWriter, r *http.Request) {
@@ -27,7 +38,7 @@ func split(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var breakDown []splitBreakdown
-	compute(&p, &breakDown, p.sumRatio)
+	compute(&p, &breakDown)
 
 	renderResponse(w,
 		response{
