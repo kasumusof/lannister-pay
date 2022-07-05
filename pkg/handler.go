@@ -26,10 +26,8 @@ func split(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var totalRatio = p.sumRatio()
-
 	var breakDown []splitBreakdown
-	compute(&p, &breakDown, totalRatio)
+	compute(&p, &breakDown, p.sumRatio)
 
 	renderResponse(w,
 		response{
