@@ -7,7 +7,7 @@ import (
 	"github.com/joho/godotenv"
 )
 
-const port = ":8080"
+const port = "8080"
 
 var (
 	Port string
