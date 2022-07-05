@@ -2,8 +2,8 @@ package pkg
 
 import (
 	"net/http"
-	"github.com/go-chi/render"
 
+	"github.com/go-chi/render"
 
 	"github.com/go-chi/chi/middleware"
 	"github.com/go-chi/chi/v5"
@@ -26,16 +26,16 @@ func split(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	var totalRatio = p.sumRatio()
+
+	var breakDown []splitBreakdown
+	compute(&p, &breakDown, totalRatio)
+
 	renderResponse(w,
 		response{
-			ID:      p.ID,
-			Balance: p.Amount,
-			SplitBreakdown: []splitBreakdown{
-				{
-					SplitEntityID: "1",
-					Amount:        p.Amount / 2,
-				},
-			},
+			ID:             p.ID,
+			Balance:        p.Amount,
+			SplitBreakdown: breakDown,
 		},
 		http.StatusOK)
 }
