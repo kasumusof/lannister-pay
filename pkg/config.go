@@ -7,6 +7,8 @@ import (
 	"github.com/joho/godotenv"
 )
 
+const port = ":8080"
+
 var (
 	Port string
 )
@@ -19,7 +21,7 @@ func init() {
 
 	Port = os.Getenv("PORT")
 	if Port == "" {
-		Port = "8080"
+		Port = port
 	}
 
 }
