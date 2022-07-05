@@ -24,9 +24,9 @@ type Payload struct {
 	sumRatio      float64
 }
 type splitInfo struct {
-	SplitType     string `json:"SplitType"`
-	SplitValue    int    `json:"SplitValue"`
-	SplitEntityID string `json:"SplitEntityId"`
+	SplitType     string  `json:"SplitType"`
+	SplitValue    float64 `json:"SplitValue"`
+	SplitEntityID string  `json:"SplitEntityId"`
 }
 
 func (p *Payload) Bind(r *http.Request) error {
@@ -65,21 +65,22 @@ func (p *Payload) sort() {
 func sortSplitInfo(splitInfo *[]splitInfo) ([]splitInfo, float64, float64) {
 	var sRatio, sFlat float64
 	for i := 0; i < len(*splitInfo); i++ {
-		switch (*splitInfo)[i].SplitType {
-		case flat:
-			sFlat += float64((*splitInfo)[i].SplitValue)
-		case ratio:
-			sRatio += float64((*splitInfo)[i].SplitValue)
-		}
 		for j := i + 1; j < len(*splitInfo); j++ {
 			if (*splitInfo)[i].SplitType > (*splitInfo)[j].SplitType {
 				(*splitInfo)[i], (*splitInfo)[j] = (*splitInfo)[j], (*splitInfo)[i]
 			}
 		}
 	}
+	for _, split := range *splitInfo {
+		switch split.SplitType {
+		case flat:
+			sFlat += split.SplitValue
+		case ratio:
+			sRatio += split.SplitValue
+		}
+	}
 	return *splitInfo, sFlat, sRatio
 }
-
 
 func compute(p *Payload, breakDown *[]splitBreakdown) {
 	for i, split := range p.SplitInfo {
@@ -88,21 +89,21 @@ func compute(p *Payload, breakDown *[]splitBreakdown) {
 		case flat:
 			num = float64(split.SplitValue)
 		case percentage:
-			num = p.Amount * float64(split.SplitValue) / 100
+			num = p.Amount * split.SplitValue / 100
 		case ratio:
-			if i == len(p.SplitInfo)-1 {
-				num = p.Amount
-			} else {
-				num = float64(split.SplitValue) * p.Amount / p.sumRatio
-			}
+			num = split.SplitValue / p.sumRatio * p.Amount
 		}
 
 		*breakDown = append(*breakDown, splitBreakdown{
 			SplitEntityID: split.SplitEntityID,
 			Amount:        num,
 		})
-		p.Amount -= num
-
+		if split.SplitType != ratio {
+			p.Amount -= num
+		}
+		if i == len(p.SplitInfo)-1 && split.SplitType == ratio {
+			p.Amount = 0
+		}
 	}
 }
 
