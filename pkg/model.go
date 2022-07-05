@@ -43,8 +43,7 @@ func (p *Payload) Bind(r *http.Request) error {
 		}},
 		&validators.FuncValidator{Name: "SplitInfo", Field: "SplitInfo", Message: fmt.Sprintf("The sum of flat split is greater than amount in  %s", "SplitInfo"), Fn: func() bool {
 			p.sort()
-			var totalFlat = p.sumFlat
-			if totalFlat > p.Amount {
+			if p.sumFlat > p.Amount {
 				return false
 			}
 			return true
@@ -82,7 +81,7 @@ func sortSplitInfo(splitInfo *[]splitInfo) ([]splitInfo, float64, float64) {
 }
 
 
-func compute(p *Payload, breakDown *[]splitBreakdown, totalRatio float64) {
+func compute(p *Payload, breakDown *[]splitBreakdown) {
 	for i, split := range p.SplitInfo {
 		var num float64
 		switch split.SplitType {
@@ -94,7 +93,7 @@ func compute(p *Payload, breakDown *[]splitBreakdown, totalRatio float64) {
 			if i == len(p.SplitInfo)-1 {
 				num = p.Amount
 			} else {
-				num = float64(split.SplitValue) * p.Amount / totalRatio
+				num = float64(split.SplitValue) * p.Amount / p.sumRatio
 			}
 		}
 
